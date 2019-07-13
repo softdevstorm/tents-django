@@ -16,7 +16,7 @@
 		<h1 class="align-center">პერგოლოა ნათურებით</h1>
 		<div class="gallery">
             {% for photo in photos %}
-                <a href="{{ photo.photo.url }}" id="{{photo.id}}" class="img-fluid"><img class="img-fluid" src="{{ photo.photo.url }}" alt="ტენტ სისტემები: სურათი ვერ მოიძებნა" title="ტენტ სისტემები" /></a>
+                <a href="{{ photo.photo.url }}" data-id="{{photo.id}}" class="img-fluid"><img class="img-fluid" src="{{ photo.photo.url }}" alt="ტენტ სისტემები: სურათი ვერ მოიძებნა" title="ტენტ სისტემები" /></a>
             {% endfor %}
 
 			<div class="clear"></div>
@@ -71,6 +71,31 @@
 			console.log('No image found, go to the next/prev');
 			console.log(e);
 		});
+
+		var ids = [];
+
+        for( var i = 0; i < $('.gallery a').length; i ++){
+            ids[i] = $('.gallery a').eq(i).attr('data-id');
+        }
+
+		$('.gallery a').click(function(){
+            $('.sl-image').append('<button class="change-photo">Change</button>');
+            $('.sl-image').append('<button class="delete-photo">Delete</button>');
+
+            $('.change-photo').click(function() {
+                var viewId = parseInt($('.sl-current').text());
+                var currentphotoid  = ids[viewId - 1];
+                console.log(currentphotoid);
+            });
+
+            $('.delete-photo').click(function() {
+                var viewId = parseInt($('.sl-current').text());
+                var currentphotoid  = ids[viewId - 1];
+                console.log(currentphotoid);
+            });
+
+        });
+
 	});
 
 </script>
