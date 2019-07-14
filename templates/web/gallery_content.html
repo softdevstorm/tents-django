@@ -12,7 +12,7 @@
 </head>
 <body>
 	<div class="container">
-        <h1>{{request.user.is_superuser}}</h1>
+        <meta id="logged_in_user" data-auth="{{request.user.is_superuser}}" style="display: none;">
 		<h1 class="align-center">პერგოლოა ნათურებით</h1>
 		<div class="gallery">
             {% for photo in photos %}
@@ -35,41 +35,41 @@
 			$selectedPhotoId = this.id;
 		})
 		.on('shown.simplelightbox', function(){
-			console.log('Shown');
+			// console.log('Shown');
 		})
 		.on('close.simplelightbox', function(){
-			console.log('Requested for closing');
+			// console.log('Requested for closing');
 		})
 		.on('closed.simplelightbox', function(){
-			console.log('Closed');
+			// console.log('Closed');
 		})
 		.on('change.simplelightbox', function(){
-			console.log('Requested for change');
+			// console.log('Requested for change');
 		})
 		.on('next.simplelightbox', function(){
-			console.log('Requested for next');
+			// console.log('Requested for next');
 		})
 		.on('prev.simplelightbox', function(){
-			console.log('Requested for prev');
+			// console.log('Requested for prev');
 		})
 		.on('nextImageLoaded.simplelightbox', function(){
-			console.log('Next image loaded');
+			// console.log('Next image loaded');
 		})
 		.on('prevImageLoaded.simplelightbox', function(){
-			console.log('Prev image loaded');
+			// console.log('Prev image loaded');
 		})
 		.on('changed.simplelightbox', function(){
-			console.log('Image changed');
+			// console.log('Image changed');
 		})
 		.on('nextDone.simplelightbox', function(){
-			console.log('Image changed to next');
+			// console.log('Image changed to next');
 		})
 		.on('prevDone.simplelightbox', function(){
-			console.log('Image changed to prev');
+			// console.log('Image changed to prev');
 		})
 		.on('error.simplelightbox', function(e){
-			console.log('No image found, go to the next/prev');
-			console.log(e);
+			// console.log('No image found, go to the next/prev');
+			// console.log(e);
 		});
 
 		var ids = [];
@@ -79,13 +79,53 @@
         }
 
 		$('.gallery a').click(function(){
-            $('.sl-image').append('<button class="change-photo">Change</button>');
-            $('.sl-image').append('<button class="delete-photo">Delete</button>');
+		    var loggedin = $('#logged_in_user').data().auth;
+		    if (loggedin == "True") {
+                $('.sl-image').append('<form method="post">{% csrf_token %}' +
+                    '<input type="file" class="upload-image" name="pic" accept="image/*" style="display: none;">' +
+                    '</form>');
+                $('.sl-image').append('<button class="change-photo">Change</button>');
+                $('.sl-image').append('<button class="delete-photo">Delete</button>');
+            }
 
             $('.change-photo').click(function() {
-                var viewId = parseInt($('.sl-current').text());
-                var currentphotoid  = ids[viewId - 1];
-                console.log(currentphotoid);
+                var data = new FormData();
+                var image = null;
+                $('.upload-image').click();
+                $('.upload-image').change(function(e) {
+                    image = e.target.files[0];
+                    var viewId = parseInt($('.sl-current').text());
+                    var currentphotoid  = ids[viewId - 1];
+
+                    data.append('image', image);
+                    data.append('photo_id', currentphotoid);
+
+                    for (var key of data.entries()) {
+                        console.log(key[0] + ', ' + key[1]);
+                    }
+
+                    var token = '{{csrf_token}}';
+
+                    $.ajax({
+                        headers: { "X-CSRFToken": token },
+                        url: '/change-photo',
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        type: 'POST',
+                        success: function(response) {
+                            console.log(response);
+                            if ( response == 'success' ) {
+                                location.reload();
+                            }
+                        },
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    });
+                    console.log(data);
+                });
             });
 
             $('.delete-photo').click(function() {

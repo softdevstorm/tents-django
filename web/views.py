@@ -1,4 +1,7 @@
+import os
+
 from django.shortcuts import render
+from django.http import HttpResponse
 from .models import Photo, Gallery
 
 
@@ -21,3 +24,14 @@ def gallery(request, gallery_id):
     }
 
     return render(request, 'web/gallery_content.html', context=context)
+
+
+def change_photo(request):
+    if request.method == 'POST':
+        photo_id = int(request.POST.get('photo_id'))
+        photo = Photo.objects.get(id=photo_id)
+        origin_photo = photo.photo.path
+        os.remove(origin_photo)
+        photo.photo = request.FILES.get('image')
+        photo.save()
+        return HttpResponse({'success': 'success'}, status=200)
