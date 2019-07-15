@@ -35,8 +35,12 @@
 <script type="text/javascript" src="{% static 'gallery_content/js/gallery_js.js' %}"></script>
 <script>
 	$(function(){
+	    var data = new FormData();
 	    var selectedPhotoId = null;
-		var $gallery = $('.gallery a').simpleLightbox();
+		var $gallery = $('.gallery a');
+		if ($gallery.length > 0) {
+		    $gallery = $gallery.simpleLightbox();
+        }
 
 		$gallery.on('show.simplelightbox', function(){
 			console.log('Requested for showing');
@@ -85,8 +89,6 @@
         for( var i = 0; i < $('.gallery a').length; i ++){
             ids[i] = $('.gallery a').eq(i).attr('data-id');
         }
-
-        var data = new FormData();
 
 		$('.gallery a').click(function(){
 		    var loggedin = $('#logged_in_user').data().auth;
@@ -171,42 +173,39 @@
                 });
             });
 
-            $('.add-new-image').click(function(e) {
-                debugger
-                var image = e.target.files[0];
-                data.append('image', image);
-                data.append('gallery_id', parseInt(window.location.href.split('/')[4]));
-            });
-
-            $('.submit-photo').click(function (e) {
-                var name = $('input[name="photo_name"]').val();
-                data.append('name', name);
-                if (data) {
-                    var token = '{{csrf_token}}';
-                    $.ajax({
-                        headers: { "X-CSRFToken": token },
-                        url: '/add-new-photo',
-                        cache: false,
-                        contentType: false,
-                        processData: false,
-                        data: data,
-                        type: 'POST',
-                        success: function(response) {
-                            console.log(response);
-                            if ( response == 'success' ) {
-                                location.reload();
-                            }
-                        },
-                        error: function(error) {
-                            console.log(error);
-                        }
-                    });
-                    console.log(data);
-                }
-
-            })
-
         });
+
+		$('.add-new-image').change(function(e) {
+            var image = e.target.files[0];
+            data.append('image', image);
+            data.append('gallery_id', parseInt(window.location.href.split('/')[4]));
+        });
+
+        $('.submit-photo').click(function (e) {
+            var name = $('input[name="photo_name"]').val();
+            data.append('name', name);
+            if (data) {
+                var token = '{{csrf_token}}';
+                $.ajax({
+                    headers: { "X-CSRFToken": token },
+                    url: '/add-new-photo',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    type: 'POST',
+                    success: function(response) {
+                        console.log(response);
+                        if ( response == 'success' ) {
+                            location.reload(true);
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            }
+        })
 
 	});
 
