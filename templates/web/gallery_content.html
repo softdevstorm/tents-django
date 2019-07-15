@@ -12,8 +12,16 @@
 </head>
 <body>
 	<div class="container">
-        <meta id="logged_in_user" data-auth="{{request.user.is_superuser}}" style="display: none;">
+        <meta id="logged_in_user" data-auth="{{request.user.is_superuser}}">
 		<h1 class="align-center">პერგოლოა ნათურებით</h1>
+        {% if request.user.is_superuser %}
+            <form method="POST">
+                {% csrf_token %}
+                <input type="file" class="add-new-image" name="pic" accept="image/*">
+                <input type="text" class="photo-name" name="photo_name" accept="image/*">
+                <input type="submit" value="Upload" class="submit-photo">
+            </form>
+        {% endif %}
 		<div class="gallery">
             {% for photo in photos %}
                 <a href="{{ photo.photo.url }}" data-id="{{photo.id}}" class="img-fluid"><img class="img-fluid" src="{{ photo.photo.url }}" alt="ტენტ სისტემები: სურათი ვერ მოიძებნა" title="ტენტ სისტემები" /></a>
@@ -27,12 +35,12 @@
 <script type="text/javascript" src="{% static 'gallery_content/js/gallery_js.js' %}"></script>
 <script>
 	$(function(){
-	    var $selectedPhotoId = null;
+	    var selectedPhotoId = null;
 		var $gallery = $('.gallery a').simpleLightbox();
 
 		$gallery.on('show.simplelightbox', function(){
 			console.log('Requested for showing');
-			$selectedPhotoId = this.id;
+			selectedPhotoId = $(this).attr('data-id');
 		})
 		.on('shown.simplelightbox', function(){
 			// console.log('Shown');
@@ -78,6 +86,8 @@
             ids[i] = $('.gallery a').eq(i).attr('data-id');
         }
 
+        var data = new FormData();
+
 		$('.gallery a').click(function(){
 		    var loggedin = $('#logged_in_user').data().auth;
 		    if (loggedin == "True") {
@@ -89,20 +99,20 @@
             }
 
             $('.change-photo').click(function() {
-                var data = new FormData();
                 var image = null;
                 $('.upload-image').click();
                 $('.upload-image').change(function(e) {
                     image = e.target.files[0];
+                    var currentphotoid = null;
                     var viewId = parseInt($('.sl-current').text());
-                    var currentphotoid  = ids[viewId - 1];
+                    if (viewId) {
+                        currentphotoid  = ids[viewId - 1];
+                    } else {
+                        currentphotoid = parseInt(selectedPhotoId);
+                    }
 
                     data.append('image', image);
                     data.append('photo_id', currentphotoid);
-
-                    for (var key of data.entries()) {
-                        console.log(key[0] + ', ' + key[1]);
-                    }
 
                     var token = '{{csrf_token}}';
 
@@ -129,10 +139,72 @@
             });
 
             $('.delete-photo').click(function() {
+                var currentphotoid = null;
                 var viewId = parseInt($('.sl-current').text());
-                var currentphotoid  = ids[viewId - 1];
-                console.log(currentphotoid);
+                if (viewId) {
+                    currentphotoid  = ids[viewId - 1];
+                } else {
+                    currentphotoid = parseInt(selectedPhotoId);
+                }
+
+                var token = '{{csrf_token}}';
+
+                data.append('photo_id', currentphotoid);
+
+                $.ajax({
+                    headers: { "X-CSRFToken": token },
+                    url: '/delete-photo',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    type: 'POST',
+                    success: function(response) {
+                        console.log(response);
+                        if ( response == 'success' ) {
+                            location.reload();
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
             });
+
+            $('.add-new-image').click(function(e) {
+                debugger
+                var image = e.target.files[0];
+                data.append('image', image);
+                data.append('gallery_id', parseInt(window.location.href.split('/')[4]));
+            });
+
+            $('.submit-photo').click(function (e) {
+                var name = $('input[name="photo_name"]').val();
+                data.append('name', name);
+                if (data) {
+                    var token = '{{csrf_token}}';
+                    $.ajax({
+                        headers: { "X-CSRFToken": token },
+                        url: '/add-new-photo',
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        type: 'POST',
+                        success: function(response) {
+                            console.log(response);
+                            if ( response == 'success' ) {
+                                location.reload();
+                            }
+                        },
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    });
+                    console.log(data);
+                }
+
+            })
 
         });
 

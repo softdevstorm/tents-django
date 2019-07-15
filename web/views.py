@@ -31,7 +31,35 @@ def change_photo(request):
         photo_id = int(request.POST.get('photo_id'))
         photo = Photo.objects.get(id=photo_id)
         origin_photo = photo.photo.path
-        os.remove(origin_photo)
+        try:
+            os.remove(origin_photo)
+        except Exception as e:
+            pass
         photo.photo = request.FILES.get('image')
         photo.save()
         return HttpResponse({'success': 'success'}, status=200)
+
+
+def delete_photo(request):
+    if request.method == 'POST':
+        photo_id = int(request.POST.get('photo_id'))
+        photo = Photo.objects.get(id=photo_id)
+        try:
+            os.remove(photo.photo.path)
+        except Exception as e:
+            pass
+        photo.delete()
+        return HttpResponse({'success': 'success'}, status=200)
+
+
+def add_new_photo(request):
+    if request.method == 'POST':
+        gallery_id = int(request.POST.get('gallery_id'))
+        gallery = Gallery.objects.filter(id=gallery_id)
+        image = request.FILES.get('image')
+        name = request.POST.get('name')
+        photo = Photo.objects.create(
+            name=request.POST.get('name'),
+            photo=request.FILES.get('image'),
+            gallery=gallery
+        )
