@@ -16,7 +16,21 @@ def index(request):
 
 
 def gallery(request):
-    render(request, 'web/gallery_content.html')
+    galleries = Gallery.objects.all()
+    gallery_list = []
+    if len(galleries):
+        for gallery in galleries:
+            item = {
+                'gallery': gallery,
+                'photos': gallery.photo_set.all()
+            }
+            gallery_list.append(item)
+
+    context = {
+        'gallery_list': gallery_list
+    }
+
+    return render(request, 'web/gallery.html', context=context)
 
 
 def gallery_detail(request, gallery_id):

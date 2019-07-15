@@ -1,7 +1,6 @@
         *.txt
 *.out
 *.pyc
-*.png
 *.dia
 *.sublime-project
 *.sublime-workspace
@@ -37,7 +36,6 @@ man
 
 #Setuptools
 build
-dist
 *.egg-info
 
 #Other
