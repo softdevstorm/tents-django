@@ -33,6 +33,20 @@ def gallery(request):
     return render(request, 'web/gallery.html', context=context)
 
 
+def update_gallery(request):
+    if request.method == "POST":
+        gallery_id = int(request.POST.get('photo_id'))
+        gallery = Gallery.objects.get(id=gallery_id)
+        origin_gallery_photo = gallery.gallery_image.path
+        try:
+            os.remove(origin_gallery_photo)
+        except Exception as e:
+            pass
+        gallery.gallery_image = request.FILES.get('image')
+        gallery.save()
+        return HttpResponse({'success': 'success'}, status=200)
+
+
 def gallery_detail(request, gallery_id):
     gallery = Gallery.objects.get(pk=gallery_id)
     photos = gallery.photo_set.all()

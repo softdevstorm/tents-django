@@ -20,7 +20,7 @@
                     <div class="gallery-photo">
                         <a href="{{gallery.gallery.gallery_image.url}}" data-type="gallery" data-id="{{gallery.gallery.id}}" class="big"><img class="img-thumbnail" src="{{gallery.gallery.gallery_image.url}}" alt="" title="{{gallery.gallery.gallery_title}}" /></a>
                         {% for photo in gallery.photos %}
-                        <a href="{{photo.photo.url}}" data-type="photo" data-id="{{gallery.gallery.id}}"><img class="img-thumbnail" src="{{photo.photo.url}}" alt="ტენტ სისტემები: სურათი ვერ მოიძებნა" title="{{photo.name}}"/></a>
+                        <a href="{{photo.photo.url}}" data-type="photo" data-id="{{photo.id}}"><img class="img-thumbnail" src="{{photo.photo.url}}" alt="ტენტ სისტემები: სურათი ვერ მოიძებნა" title="{{photo.name}}"/></a>
                         {% endfor %}
                     </div>
                 {% endif %}
@@ -122,63 +122,89 @@
                     data.append('photo_id', currentphotoid);
                     data.append('type', changetype);
 
-                    console.log(currentphotoid);
-                    console.log(changetype);
-
                     var token = '{{csrf_token}}';
 
-                    // $.ajax({
-                    //     headers: { "X-CSRFToken": token },
-                    //     url: '/change-photo',
-                    //     cache: false,
-                    //     contentType: false,
-                    //     processData: false,
-                    //     data: data,
-                    //     type: 'POST',
-                    //     success: function(response) {
-                    //         console.log(response);
-                    //         if ( response == 'success' ) {
-                    //             location.reload();
-                    //         }
-                    //     },
-                    //     error: function(error) {
-                    //         console.log(error);
-                    //     }
-                    // });
+                    if (changetype == "photo") {
+                        $.ajax({
+                            headers: { "X-CSRFToken": token },
+                            url: '/change-photo',
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            data: data,
+                            type: 'POST',
+                            success: function(response) {
+                                console.log(response);
+                                if ( response == 'success' ) {
+                                    location.reload();
+                                }
+                            },
+                            error: function(error) {
+                                console.log(error);
+                            }
+                        });
+                    } else {
+                        $.ajax({
+                            headers: { "X-CSRFToken": token },
+                            url: '/update-gallery',
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            data: data,
+                            type: 'POST',
+                            success: function(response) {
+                                console.log(response);
+                                if ( response == 'success' ) {
+                                    location.reload();
+                                }
+                            },
+                            error: function(error) {
+                                console.log(error);
+                            }
+                        });
+                    }
                 });
             });
 
             $('.delete-photo').click(function() {
                 var currentphotoid = null;
+                var changetype = null;
                 var viewId = parseInt($('.sl-current').text());
                 if (viewId) {
-                    currentphotoid  = ids[viewId - 1];
+                    currentphotoid  = ids[viewId - 1]['id'];
+                    changetype = ids[viewId - 1]['type'];
                 } else {
                     currentphotoid = parseInt(selectedPhotoId);
+                    changetype = selectedType;
                 }
 
                 var token = '{{csrf_token}}';
 
-                data.append('photo_id', currentphotoid);
+                if (changetype == "photo") {
 
-                $.ajax({
-                    headers: { "X-CSRFToken": token },
-                    url: '/delete-photo',
-                    cache: false,
-                    contentType: false,
-                    processData: false,
-                    data: data,
-                    type: 'POST',
-                    success: function(response) {
-                        console.log(response);
-                        if ( response == 'success' ) {
-                            location.reload();
+                    data.append('photo_id', currentphotoid);
+
+                    $.ajax({
+                        headers: { "X-CSRFToken": token },
+                        url: '/delete-photo',
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        type: 'POST',
+                        success: function(response) {
+                            console.log(response);
+                            if ( response == 'success' ) {
+                                location.reload();
+                            }
+                        },
+                        error: function(error) {
+                            console.log(error);
                         }
-                    },
-                    error: function(error) {
-                        console.log(error);
-                    }
-                });
+                    });
+                } else {
+                    alert("can't delete gallery");
+                }
             });
 
         });
