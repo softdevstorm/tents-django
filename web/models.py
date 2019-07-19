@@ -3,8 +3,8 @@ from django.db import models
 
 # Create your models here.
 class Gallery(models.Model):
-    gallery_title = models.CharField(max_length=200, null=True, blank=False, required=True)
-    gallery_image = models.ImageField(upload_to='gallery', null=True, blank=False, required=True)
+    gallery_title = models.CharField(max_length=200, null=True, blank=False)
+    gallery_image = models.ImageField(upload_to='gallery', null=True, blank=False)
 
     class Meta:
         db_table = 'gallery'
@@ -17,8 +17,8 @@ class Gallery(models.Model):
 
 
 class Photo(models.Model):
-    name = models.CharField(max_length=400, blank=False, default='', required=True)
-    photo = models.ImageField(upload_to='gallery/photos/', null=True, blank=False, required=True)
+    name = models.CharField(max_length=400, blank=False, default='')
+    photo = models.ImageField(upload_to='gallery/photos/', null=True, blank=False)
     gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE)
 
     class Meta:
