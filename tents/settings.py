@@ -25,7 +25,7 @@ SECRET_KEY = '(l$66(7vy#2uoes7t85-1x_70h@&hh%osocl3^65v7nkd=g+uj'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '18.217.140.142', 'localhost', '127.0.0.1', 'tents.ge']
 
 
 # Application definition
